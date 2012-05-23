@@ -81,6 +81,10 @@
       <TypeName>DELETERequest</TypeName>
       <Namespace>bLogical.RESTSchemas</Namespace>
     </Schema>
+    <Schema Include="EmptyResponse.xsd">
+      <TypeName>EmptyResponse</TypeName>
+      <Namespace>bLogical.RESTSchemas</Namespace>
+    </Schema>
     <None Include="Key.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

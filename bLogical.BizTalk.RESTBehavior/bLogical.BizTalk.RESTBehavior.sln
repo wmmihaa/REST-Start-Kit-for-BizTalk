@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bLogical.RESTSchemas", "bLo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{86E369CD-1D45-4FE9-8EB6-099A2D059913}"
 	ProjectSection(SolutionItems) = preProject
+		HEADERS.txt = HEADERS.txt
 		bLogical.BizTalk.RESTBehavior\WCF-Custom.BindingsExtension.config = bLogical.BizTalk.RESTBehavior\WCF-Custom.BindingsExtension.config
 	EndProjectSection
 EndProject

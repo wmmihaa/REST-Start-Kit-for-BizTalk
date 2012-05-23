@@ -19,7 +19,7 @@ using System.ComponentModel;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
-    public class BizTalkWebHttpBehaviorExtensionElement : System.ServiceModel.Configuration.BehaviorExtensionElement
+    public class BizTalkRESTRequestHandlerExtensionElement : System.ServiceModel.Configuration.BehaviorExtensionElement
     {
         [Description("Represents a Uniform Resource Identifier (URI) template. The UriTemplate is optional, but needs to be set if named parameters are expected")]
         [ConfigurationProperty("uriTemplates", DefaultValue = "", IsRequired = false)]
@@ -37,12 +37,12 @@ namespace bLogical.BizTalk.RESTBehavior
 
         public override Type BehaviorType
         {
-            get { return typeof(BizTalkWebHttpBehavior); }
+            get { return typeof(BizTalkRESTRequestHandlerBehavior); }
         }
 
         protected override object CreateBehavior()
         {
-            BizTalkWebHttpBehavior bizTalkWebHttpBehavior = new BizTalkWebHttpBehavior();
+            BizTalkRESTRequestHandlerBehavior bizTalkWebHttpBehavior = new BizTalkRESTRequestHandlerBehavior();
 
             if (!string.IsNullOrEmpty(this.UriTemplates))
             {
@@ -57,28 +57,28 @@ namespace bLogical.BizTalk.RESTBehavior
             return bizTalkWebHttpBehavior;
         }
     }
-    public class BizTalkWebHttpBehavior : WebHttpBehavior
+    public class BizTalkRESTRequestHandlerBehavior : WebHttpBehavior
     {
-        public BizTalkWebHttpBehavior()
+        public BizTalkRESTRequestHandlerBehavior()
         {
             this.uriTemplates = new List<UriTemplate>();
         }
         public List<UriTemplate> uriTemplates { get; set; }
         protected override WebHttpDispatchOperationSelector GetOperationSelector(ServiceEndpoint endpoint)
         {
-            return new BizTalkWebHttpOperationSelector(endpoint) { uriTemplates = this.uriTemplates };
+            return new BizTalkRESTRequestHandler(endpoint) { uriTemplates = this.uriTemplates };
         }
         public override void ApplyDispatchBehavior(ServiceEndpoint endpoint, EndpointDispatcher endpointDispatcher)
         {
-            endpointDispatcher.DispatchRuntime.MessageInspectors.Add(new JSONParser());
+            endpointDispatcher.DispatchRuntime.MessageInspectors.Add(new BizTalkRESTResponseHandler());
             base.ApplyDispatchBehavior(endpoint, endpointDispatcher);
         }
     }
-    public class BizTalkWebHttpOperationSelector : WebHttpDispatchOperationSelector
+    public class BizTalkRESTRequestHandler : WebHttpDispatchOperationSelector
     {
         public List<UriTemplate> uriTemplates { get; set; }
         ServiceEndpoint _currentEndpoint = null;
-        public BizTalkWebHttpOperationSelector(ServiceEndpoint endpoint)
+        public BizTalkRESTRequestHandler(ServiceEndpoint endpoint)
             : base(endpoint)
         {
             _currentEndpoint = endpoint;
@@ -92,18 +92,41 @@ namespace bLogical.BizTalk.RESTBehavior
 
         protected override string SelectOperation(ref Message message, out bool uriMatched)
         {
+            //if(1==2)
+            //    string s = MessageHelper.MessageToString(ref message, WebContentFormat.Xml);
+    
             HttpRequestMessageProperty httpProp = (HttpRequestMessageProperty)message.Properties[HttpRequestMessageProperty.Name];
 
             if(httpProp.Method=="GET" || httpProp.Method=="DELETE")
                 message = ConvertToURIRequest(message);
-            else if ((httpProp.Method == "POST" || httpProp.Method == "PUT") && message.Properties["httpRequest"].ToString().ToLower().Contains("application/json"))
+            else if ((httpProp.Method == "POST" || httpProp.Method == "PUT") && ((HttpRequestMessageProperty)message.Properties["httpRequest"]).Headers.ToString().ToLower().Contains("application/json"))
+            {
                 message = ConvertToXmlMessage(message);
-            
+            }
+
             uriMatched = true;
             return "TwoWayMethod";
         }
 
-        private Message ConvertToXmlMessage(Message message)
+        public Message ConvertToXmlMessage(Message message)
+        {
+            MemoryStream ms = new MemoryStream();
+            XmlDictionaryWriter writer = JsonReaderWriterFactory.CreateJsonWriter(ms);
+            message.WriteMessage(writer);
+            writer.Flush();
+            string jsonString = Encoding.UTF8.GetString(ms.ToArray());
+
+            XmlNodeConverter xmlNodeConverter = new XmlNodeConverter();
+            XmlDocument myXmlNode = JsonConvert.DeserializeXmlNode(jsonString);
+            MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(myXmlNode.InnerXml));
+
+            XmlReader reader = XmlReader.Create(stream);
+            Message newMessage = Message.CreateMessage(reader, int.MaxValue, MessageVersion.None);
+            newMessage.Properties.CopyProperties(message.Properties);
+            return newMessage;
+        }
+
+        private Message _ConvertToXmlMessage(Message message)
         {
             Message newMessage = null;
             try
@@ -117,6 +140,7 @@ namespace bLogical.BizTalk.RESTBehavior
                 XmlNodeConverter xmlNodeConverter = new XmlNodeConverter();
                 XmlDocument myXmlNode = JsonConvert.DeserializeXmlNode(jsonString);
                 MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(myXmlNode.InnerXml));
+                stream.Position = 0;
 
                 XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
                 newMessage = Message.CreateMessage(reader, int.MaxValue, message.Version);

@@ -1,0 +1,12 @@
+
+
+Accept: application/json
+Content-Type: application/json
+
+
+{"ns0:Event":{"@xmlns:ns0":"http://RESTDEMO.Event","Id":"100","Date":"2012-05-10","Name":"TEST"}}
+
+<ns0:Event xmlns:ns0="http://RESTDEMO.Event"><Id>100</Id><Date>2012-05-10</Date><Name>TEST</Name></ns0:Event>
+
+
+

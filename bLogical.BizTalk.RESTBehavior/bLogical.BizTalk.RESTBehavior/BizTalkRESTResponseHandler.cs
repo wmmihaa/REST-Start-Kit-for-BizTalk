@@ -13,7 +13,7 @@ using System.ServiceModel.Web;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
-    public class JSONParser : IDispatchMessageInspector
+    public class BizTalkRESTResponseHandler : IDispatchMessageInspector
     {
         public object AfterReceiveRequest(ref System.ServiceModel.Channels.Message request, IClientChannel channel, InstanceContext instanceContext)
         {
@@ -36,11 +36,10 @@ namespace bLogical.BizTalk.RESTBehavior
             }
 
             // Debug
-            //string s = MessageToString(ref request, WebContentFormat.Xml);
+            string s = MessageHelper.CastMessageFormat(ref request, WebContentFormat.Xml);
 
             return null;
         }
-
         public void BeforeSendReply(ref System.ServiceModel.Channels.Message reply, object correlationState)
         {
             Trace.WriteLine("BeforeSendReply called.", "bLogical");
@@ -71,76 +70,6 @@ namespace bLogical.BizTalk.RESTBehavior
             
             OperationContext.Current.Extensions.Remove(ctx);
         }
-
-        private string MessageToString(ref Message message, WebContentFormat messageFormat)
-        {
-            MemoryStream ms = new MemoryStream();
-            XmlDictionaryWriter writer = null;
-            switch (messageFormat)
-            {
-                case WebContentFormat.Default:
-                case WebContentFormat.Xml:
-                    writer = XmlDictionaryWriter.CreateTextWriter(ms);
-                    break;
-                case WebContentFormat.Json:
-                    writer = JsonReaderWriterFactory.CreateJsonWriter(ms);
-                    break;
-                case WebContentFormat.Raw:
-                    // special case for raw, easier implemented separately 
-                    return this.ReadRawBody(ref message);
-            }
-
-            message.WriteMessage(writer);
-            writer.Flush();
-            string messageBody = Encoding.UTF8.GetString(ms.ToArray());
-
-            // Here would be a good place to change the message body, if so desired. 
-
-            // now that the message was read, it needs to be recreated. 
-            ms.Position = 0;
-
-            // if the message body was modified, needs to reencode it, as show below 
-            // ms = new MemoryStream(Encoding.UTF8.GetBytes(messageBody)); 
-
-            XmlDictionaryReader reader;
-            if (messageFormat == WebContentFormat.Json)
-            {
-                reader = JsonReaderWriterFactory.CreateJsonReader(ms, XmlDictionaryReaderQuotas.Max);
-            }
-            else
-            {
-                reader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
-            }
-
-            Message newMessage = Message.CreateMessage(reader, int.MaxValue, message.Version);
-            newMessage.Properties.CopyProperties(message.Properties);
-            message = newMessage;
-
-            return messageBody;
-        }
-
-        private string ReadRawBody(ref Message message)
-        {
-            XmlDictionaryReader bodyReader = message.GetReaderAtBodyContents();
-            bodyReader.ReadStartElement("Binary");
-            byte[] bodyBytes = bodyReader.ReadContentAsBase64();
-            string messageBody = Encoding.UTF8.GetString(bodyBytes);
-
-            // Now to recreate the message 
-            MemoryStream ms = new MemoryStream();
-            XmlDictionaryWriter writer = XmlDictionaryWriter.CreateBinaryWriter(ms);
-            writer.WriteStartElement("Binary");
-            writer.WriteBase64(bodyBytes, 0, bodyBytes.Length);
-            writer.WriteEndElement();
-            writer.Flush();
-            ms.Position = 0;
-            XmlDictionaryReader reader = XmlDictionaryReader.CreateBinaryReader(ms, XmlDictionaryReaderQuotas.Max);
-            Message newMessage = Message.CreateMessage(reader, int.MaxValue, message.Version);
-            newMessage.Properties.CopyProperties(message.Properties);
-            message = newMessage;
-
-            return messageBody;
-        } 
     }
 
     class RequestContext : IExtension<OperationContext>
