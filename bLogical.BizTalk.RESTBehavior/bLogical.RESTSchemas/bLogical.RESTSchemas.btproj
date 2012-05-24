@@ -73,16 +73,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Schema Include="GETRequest.xsd">
-      <TypeName>GETRequest</TypeName>
-      <Namespace>bLogical.RESTSchemas</Namespace>
+    <Schema Include="PropertySchema.xsd">
+      <TypeName>PropertySchema</TypeName>
+      <Namespace>bLogical.RESTSchemas.PropertySchema</Namespace>
     </Schema>
-    <Schema Include="DELETERequest.xsd">
-      <TypeName>DELETERequest</TypeName>
-      <Namespace>bLogical.RESTSchemas</Namespace>
-    </Schema>
-    <Schema Include="EmptyResponse.xsd">
-      <TypeName>EmptyResponse</TypeName>
+    <Schema Include="BizTalkWebHttpRequest.xsd">
+      <TypeName>BizTalkWebHttpRequest</TypeName>
       <Namespace>bLogical.RESTSchemas</Namespace>
     </Schema>
     <None Include="Key.snk" />

@@ -6,11 +6,19 @@ using System.ServiceModel.Channels;
 using System.IO;
 using System.Xml;
 using System.Runtime.Serialization.Json;
+using System.Xml.Linq;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
     class MessageHelper
     {
+        public static readonly XNamespace BizTalkWebHttpNs = "http://bLogical.RESTSchemas.BizTalkWebHttpRequest/1.0";
+        public static readonly XName Request = BizTalkWebHttpNs + "bizTalkWebHttpRequest";
+        public static readonly XName Header = BizTalkWebHttpNs + "header";
+        public static readonly XName Params = BizTalkWebHttpNs + "params"; 
+        public static readonly XName Param = BizTalkWebHttpNs + "param";
+        public static readonly XName Body = BizTalkWebHttpNs + "body";
+
         public static string CastMessageFormat(ref Message message, WebContentFormat messageFormat)
         {
             MemoryStream ms = new MemoryStream();
@@ -76,7 +84,53 @@ namespace bLogical.BizTalk.RESTBehavior
             message = newMessage;
 
             return messageBody;
-        } 
+        }
+        public static string CreateURIRequest(Message message, List<UriTemplate> uriTemplates, Uri listenUri)
+        {
+            HttpRequestMessageProperty httpProp = (HttpRequestMessageProperty)message.Properties[HttpRequestMessageProperty.Name];
 
+            XElement root = new XElement(Request,
+                new XAttribute(XNamespace.Xmlns + "ns0", BizTalkWebHttpNs.NamespaceName),
+                new XAttribute("method", httpProp.Method));
+
+            XElement paramsElement = new XElement(Params);
+            root.Add(paramsElement);
+
+            if (uriTemplates != null) // UriTemplate exists. Eg /rest/firstname={fname}&lastname={lname}
+            {
+                bool templateMatch = false;
+                foreach (var uriTemplate in uriTemplates)
+                {
+                    Uri baseUri = new Uri(message.Headers.To.ToString().Replace(message.Headers.To.AbsolutePath, string.Empty));
+                    UriTemplateMatch results = uriTemplate.Match(baseUri, message.Headers.To);
+
+                    if (results == null)
+                        continue;
+
+                    templateMatch = true;
+                    foreach (string variableName in results.BoundVariables.Keys)
+                    {
+                        XElement paramElement = new XElement(BizTalkWebHttpNs + "param", new XAttribute("name", variableName));
+                        paramElement.Value = results.BoundVariables[variableName];
+                        paramsElement.Add(paramElement);
+                    }
+
+                    break;
+                }
+                if (!templateMatch)
+                    throw new ApplicationException("Uri didn't match the template");
+            }
+            else // No uri template. Eg http://localhost/Orders/2012/10
+            {
+                string[] segments = message.Headers.To.ToString().Replace(listenUri.ToString(), string.Empty).Split('/');
+
+                foreach (string val in segments)
+                {
+                    if (!string.IsNullOrEmpty(val))
+                        paramsElement.Add(new XElement(Param).Value = val);
+                }
+            }
+            return root.ToString();
+        }
     }
 }

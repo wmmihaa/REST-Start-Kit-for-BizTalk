@@ -21,7 +21,6 @@ namespace bLogical.BizTalk.RESTBehavior
 {
     public class BizTalkRESTRequestHandlerExtensionElement : System.ServiceModel.Configuration.BehaviorExtensionElement
     {
-        [Description("Represents a Uniform Resource Identifier (URI) template. The UriTemplate is optional, but needs to be set if named parameters are expected")]
         [ConfigurationProperty("uriTemplates", DefaultValue = "", IsRequired = false)]
         public string UriTemplates
         {
@@ -92,9 +91,6 @@ namespace bLogical.BizTalk.RESTBehavior
 
         protected override string SelectOperation(ref Message message, out bool uriMatched)
         {
-            //if(1==2)
-            //    string s = MessageHelper.MessageToString(ref message, WebContentFormat.Xml);
-    
             HttpRequestMessageProperty httpProp = (HttpRequestMessageProperty)message.Properties[HttpRequestMessageProperty.Name];
 
             if(httpProp.Method=="GET" || httpProp.Method=="DELETE")
@@ -126,40 +122,13 @@ namespace bLogical.BizTalk.RESTBehavior
             return newMessage;
         }
 
-        private Message _ConvertToXmlMessage(Message message)
-        {
-            Message newMessage = null;
-            try
-            {
-                MemoryStream ms = new MemoryStream();
-                XmlDictionaryWriter writer = JsonReaderWriterFactory.CreateJsonWriter(ms);
-                message.WriteMessage(writer);
-                writer.Flush();
-                string jsonString = Encoding.UTF8.GetString(ms.ToArray());
-
-                XmlNodeConverter xmlNodeConverter = new XmlNodeConverter();
-                XmlDocument myXmlNode = JsonConvert.DeserializeXmlNode(jsonString);
-                MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(myXmlNode.InnerXml));
-                stream.Position = 0;
-
-                XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
-                newMessage = Message.CreateMessage(reader, int.MaxValue, message.Version);
-                newMessage.Properties.CopyProperties(message.Properties);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Unable to cast JSON encoded message to XML", ex);
-            }
-            return newMessage;
-        }
-
         private Message ConvertToURIRequest(Message message)
         {
             Message newRequest = null;
             try
             {
-                Trace.WriteLine("SelectOperation called with a GET Request.", "bLogical");
-                string requestBody = CreateURIRequest(message);
+                string requestBody = MessageHelper.CreateURIRequest(message, this.uriTemplates, _currentEndpoint.ListenUri);
+
                 MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(requestBody));
                 XmlReader reader = XmlReader.Create(ms);
 
@@ -184,51 +153,6 @@ namespace bLogical.BizTalk.RESTBehavior
             return newRequest;
         }
 
-        private string CreateURIRequest(Message message)
-        {
-            HttpRequestMessageProperty httpProp = (HttpRequestMessageProperty)message.Properties[HttpRequestMessageProperty.Name];
-
-            XNamespace ns = string.Format("http://bLogical.RESTSchemas.{0}Request", httpProp.Method);
-            XElement segmentsElement = new XElement("Segments");
-            XElement xmlTree = new XElement(ns + string.Format("{0}Request",httpProp.Method), 
-                new XAttribute(XNamespace.Xmlns + "ns0", ns.NamespaceName), 
-                segmentsElement);
-
-            if (this.uriTemplates != null) // UriTemplate exists. Eg /rest/firstname={fname}&lastname={lname}
-            {
-                bool templateMatch = false;
-                foreach (var uriTemplate in this.uriTemplates)
-                {
-                    Uri baseUri = new Uri(message.Headers.To.ToString().Replace(message.Headers.To.AbsolutePath, string.Empty));
-                    UriTemplateMatch results = uriTemplate.Match(baseUri, message.Headers.To);
-
-                    if (results == null)
-                        continue;
-
-                    templateMatch = true;
-                    foreach (string variableName in results.BoundVariables.Keys)
-                    {
-                        segmentsElement.Add(new XElement("Segment", new XAttribute("name", variableName), new XAttribute("value", results.BoundVariables[variableName])));
-                    }
-
-                    break;
-                }
-                if (!templateMatch)
-                    throw new ApplicationException("Uri didn't match the template");
-
-            }
-            else // No uri template. Eg http://localhost/Orders/2012/10
-            {
-                string[] segments = message.Headers.To.ToString().Replace(_currentEndpoint.ListenUri.ToString(), string.Empty).Split('/');
-
-                foreach (string val in segments)
-                {
-                    if(!string.IsNullOrEmpty(val))
-                        segmentsElement.Add(new XElement("Segment", new XAttribute("value", val)));
-                }
-
-            }
-            return xmlTree.ToString();          
-        }
+        
     }
 }

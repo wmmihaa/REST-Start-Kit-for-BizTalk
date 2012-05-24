@@ -7,16 +7,51 @@ using System.ServiceModel.Channels;
 using System.ServiceModel;
 using System.Xml.Schema;
 using System.ServiceModel.Dispatcher;
+using System.ServiceModel.Description;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
-    public class BizTalkWebHttpMessageInspector : IClientMessageInspector
+    public class BizTalkRESTTransmitHandlerExtensionElement : System.ServiceModel.Configuration.BehaviorExtensionElement
     {
-        private static readonly XNamespace BizTalkWebHttpNs = "http://microsoft.com/schemas/samples/biztalkwebhttp/1.0 [This link is external to TechNet Wiki. It will open in a new window.] ";
-        private static readonly XName Request = BizTalkWebHttpNs + "bizTalkWebHttpRequest";
-        private static readonly XName Header = BizTalkWebHttpNs + "header";
-        private static readonly XName Param = BizTalkWebHttpNs + "param";
-        private static readonly XName Body = BizTalkWebHttpNs + "body";
+        public override Type BehaviorType
+        {
+            get { return typeof(BizTalkRESTTransmitHandlerEndpointBehavior); }
+        }
+
+        protected override object CreateBehavior()
+        {
+            return new BizTalkRESTTransmitHandlerEndpointBehavior();
+        }
+    }
+    public class BizTalkRESTTransmitHandlerEndpointBehavior : IEndpointBehavior
+    {
+        public void AddBindingParameters(ServiceEndpoint endpoint, BindingParameterCollection bindingParameters)
+        {
+
+        }
+
+        public void ApplyClientBehavior(ServiceEndpoint endpoint, ClientRuntime clientRuntime)
+        {
+            clientRuntime.MessageInspectors.Add(new BizTalkRESTTransmitHandler());
+        }
+
+        public void ApplyDispatchBehavior(ServiceEndpoint endpoint, EndpointDispatcher endpointDispatcher)
+        {
+
+        }
+
+        public void Validate(ServiceEndpoint endpoint)
+        {
+
+        }
+    }
+    public class BizTalkRESTTransmitHandler : IClientMessageInspector
+    {
+        public static readonly XNamespace BizTalkWebHttpNs = "http://bLogical.RESTSchemas.BizTalkWebHttpRequest/1.0";
+        public static readonly XName Request = BizTalkWebHttpNs + "bizTalkWebHttpRequest";
+        public static readonly XName Header = BizTalkWebHttpNs + "header";
+        public static readonly XName Param = BizTalkWebHttpNs + "param";
+        public static readonly XName Body = BizTalkWebHttpNs + "body";
 
         public object BeforeSendRequest(ref Message request, IClientChannel channel)
         {
@@ -29,22 +64,17 @@ namespace bLogical.BizTalk.RESTBehavior
             var bodyElement = requestBody.Element(Body);
             var requestMessageProperty = new HttpRequestMessageProperty
             {
-                Method = requestBody.Attribute("method").Value,
+                Method = requestBody.Attribute("Method").Value,
                 SuppressEntityBody = bodyElement == null
             };
-            foreach (var header in requestBody.Elements(Header))
-            {
-                requestMessageProperty.Headers.Add(
-                header.Attribute("name").Value,
-                header.Value);
-            }
-            var uriTemplate = new UriTemplate(requestBody.Attribute("uriTemplate").Value);
-            request = bodyElement == null
-                ? Message.CreateMessage(request.Version, request.Headers.Action)
-                : Message.CreateMessage(request.Version, request.Headers.Action, bodyElement);
+            
+            var uriTemplate = new UriTemplate(requestBody.Attribute("UriTemplate").Value);
+
+            request = Message.CreateMessage(request.Version, request.Headers.Action);
+
             request.Headers.To = uriTemplate.BindByName(channel.RemoteAddress.Uri,
-                requestBody.Elements(Param).ToDictionary(
-                e => e.Attribute("name").Value, e => e.Value));
+                requestBody.Elements(Param).ToDictionary( e => e.Attribute("name").Value, e => e.Value));
+
             request.Properties[HttpRequestMessageProperty.Name] = requestMessageProperty;
             return null;
         }
