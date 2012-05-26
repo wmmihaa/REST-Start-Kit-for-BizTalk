@@ -1,0 +1,152 @@
+﻿#if __DESIGNER_DATA
+#error Do not define __DESIGNER_DATA.
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<om:MetaModel MajorVersion="1" MinorVersion="3" Core="2b131234-7959-458d-834f-2dc0769ce683" ScheduleModel="66366196-361d-448d-976f-cab5e87496d2" xmlns:om="http://schemas.microsoft.com/BizTalk/2003/DesignerData">
+    <om:Element Type="Module" OID="d4d72ea1-72ff-4696-bcf4-dae0a0a4c3a3" LowerBound="1.1" HigherBound="33.1">
+        <om:Property Name="ReportToAnalyst" Value="True" />
+        <om:Property Name="Name" Value="BizTalkSampleApplication" />
+        <om:Property Name="Signal" Value="False" />
+        <om:Element Type="ServiceDeclaration" OID="492e3999-bcdc-4f4d-a49e-b46c766a5d6c" ParentLink="Module_ServiceDeclaration" LowerBound="11.1" HigherBound="32.1">
+            <om:Property Name="InitializedTransactionType" Value="False" />
+            <om:Property Name="IsInvokable" Value="False" />
+            <om:Property Name="TypeModifier" Value="Internal" />
+            <om:Property Name="ReportToAnalyst" Value="True" />
+            <om:Property Name="Name" Value="ExposeDELETE" />
+            <om:Property Name="Signal" Value="False" />
+            <om:Element Type="MessageDeclaration" OID="12a65657-680e-4118-8d25-def8ce6924b7" ParentLink="ServiceDeclaration_MessageDeclaration" LowerBound="16.1" HigherBound="17.1">
+                <om:Property Name="Type" Value="bLogical.RESTSchemas.BizTalkWebHttpRequest" />
+                <om:Property Name="ParamDirection" Value="In" />
+                <om:Property Name="ReportToAnalyst" Value="True" />
+                <om:Property Name="Name" Value="httpRequest" />
+                <om:Property Name="Signal" Value="True" />
+            </om:Element>
+            <om:Element Type="MessageDeclaration" OID="c28c9fa0-edd9-42b6-8209-3187b8c0090b" ParentLink="ServiceDeclaration_MessageDeclaration" LowerBound="17.1" HigherBound="18.1">
+                <om:Property Name="Type" Value="System.String" />
+                <om:Property Name="ParamDirection" Value="In" />
+                <om:Property Name="ReportToAnalyst" Value="True" />
+                <om:Property Name="Name" Value="httpResponse" />
+                <om:Property Name="Signal" Value="True" />
+            </om:Element>
+            <om:Element Type="ServiceBody" OID="5bb9e353-8387-48bf-9756-1f7bbac8edd8" ParentLink="ServiceDeclaration_ServiceBody">
+                <om:Property Name="Signal" Value="False" />
+                <om:Element Type="Receive" OID="79c26956-1363-4c59-b45f-9b66c33309e6" ParentLink="ServiceBody_Statement" LowerBound="20.1" HigherBound="22.1">
+                    <om:Property Name="Activate" Value="True" />
+                    <om:Property Name="PortName" Value="RESTService" />
+                    <om:Property Name="MessageName" Value="httpRequest" />
+                    <om:Property Name="OperationName" Value="DELETE" />
+                    <om:Property Name="OperationMessageName" Value="Request" />
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Receive DELETE" />
+                    <om:Property Name="Signal" Value="True" />
+                    <om:Element Type="DNFPredicate" OID="8f0a6daf-38db-4b0a-9e43-4232c80f8204" ParentLink="Receive_DNFPredicate">
+                        <om:Property Name="LHS" Value="bLogical.RESTSchemas.PropertySchema.HTTPMethod" />
+                        <om:Property Name="RHS" Value="&quot;DELETE&quot;" />
+                        <om:Property Name="Grouping" Value="AND" />
+                        <om:Property Name="Operator" Value="Equals" />
+                        <om:Property Name="Signal" Value="False" />
+                    </om:Element>
+                </om:Element>
+                <om:Element Type="Construct" OID="2f281a66-6dcd-4680-8c70-4a905e592927" ParentLink="ServiceBody_Statement" LowerBound="22.1" HigherBound="28.1">
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Construct Response" />
+                    <om:Property Name="Signal" Value="True" />
+                    <om:Element Type="MessageAssignment" OID="2187027c-70da-4822-aa14-978cec79b4b9" ParentLink="ComplexStatement_Statement" LowerBound="25.1" HigherBound="27.1">
+                        <om:Property Name="Expression" Value="httpResponse = &quot;The event was deleted&quot;;" />
+                        <om:Property Name="ReportToAnalyst" Value="False" />
+                        <om:Property Name="Name" Value="MessageAssignment_1" />
+                        <om:Property Name="Signal" Value="True" />
+                    </om:Element>
+                    <om:Element Type="MessageRef" OID="98064c42-ce97-4c59-9026-763a8997e188" ParentLink="Construct_MessageRef" LowerBound="23.23" HigherBound="23.35">
+                        <om:Property Name="Ref" Value="httpResponse" />
+                        <om:Property Name="ReportToAnalyst" Value="True" />
+                        <om:Property Name="Signal" Value="False" />
+                    </om:Element>
+                </om:Element>
+                <om:Element Type="Send" OID="835b6583-0f86-4ffd-bdb5-36363d7348ee" ParentLink="ServiceBody_Statement" LowerBound="28.1" HigherBound="30.1">
+                    <om:Property Name="PortName" Value="RESTService" />
+                    <om:Property Name="MessageName" Value="httpResponse" />
+                    <om:Property Name="OperationName" Value="DELETE" />
+                    <om:Property Name="OperationMessageName" Value="Response" />
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Send DELETE" />
+                    <om:Property Name="Signal" Value="True" />
+                </om:Element>
+            </om:Element>
+            <om:Element Type="PortDeclaration" OID="f3478448-5180-4738-a2f0-d58be6f66482" ParentLink="ServiceDeclaration_PortDeclaration" LowerBound="14.1" HigherBound="16.1">
+                <om:Property Name="PortModifier" Value="Implements" />
+                <om:Property Name="Orientation" Value="Left" />
+                <om:Property Name="PortIndex" Value="-1" />
+                <om:Property Name="IsWebPort" Value="False" />
+                <om:Property Name="OrderedDelivery" Value="False" />
+                <om:Property Name="DeliveryNotification" Value="None" />
+                <om:Property Name="Type" Value="BizTalkSampleApplication.PortType_7" />
+                <om:Property Name="ParamDirection" Value="In" />
+                <om:Property Name="ReportToAnalyst" Value="True" />
+                <om:Property Name="Name" Value="RESTService" />
+                <om:Property Name="Signal" Value="False" />
+                <om:Element Type="LogicalBindingAttribute" OID="e0d348a4-a9a7-4db7-9976-7e4f2cf3a874" ParentLink="PortDeclaration_CLRAttribute" LowerBound="14.1" HigherBound="15.1">
+                    <om:Property Name="Signal" Value="False" />
+                </om:Element>
+            </om:Element>
+        </om:Element>
+        <om:Element Type="PortType" OID="6a35fc4a-7280-4ded-b6c6-334de77888cf" ParentLink="Module_PortType" LowerBound="4.1" HigherBound="11.1">
+            <om:Property Name="Synchronous" Value="True" />
+            <om:Property Name="TypeModifier" Value="Internal" />
+            <om:Property Name="ReportToAnalyst" Value="True" />
+            <om:Property Name="Name" Value="PortType_7" />
+            <om:Property Name="Signal" Value="False" />
+            <om:Element Type="OperationDeclaration" OID="dc54a6e4-1d3e-4c26-a33a-89a2d307ce23" ParentLink="PortType_OperationDeclaration" LowerBound="6.1" HigherBound="10.1">
+                <om:Property Name="OperationType" Value="RequestResponse" />
+                <om:Property Name="ReportToAnalyst" Value="True" />
+                <om:Property Name="Name" Value="DELETE" />
+                <om:Property Name="Signal" Value="True" />
+                <om:Element Type="MessageRef" OID="9e1bd415-f90f-4b01-a473-a4a308141e3d" ParentLink="OperationDeclaration_RequestMessageRef" LowerBound="8.13" HigherBound="8.55">
+                    <om:Property Name="Ref" Value="bLogical.RESTSchemas.BizTalkWebHttpRequest" />
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Request" />
+                    <om:Property Name="Signal" Value="False" />
+                </om:Element>
+                <om:Element Type="MessageRef" OID="3abdc503-0b08-41f4-a919-2735669647fe" ParentLink="OperationDeclaration_ResponseMessageRef" LowerBound="8.57" HigherBound="8.70">
+                    <om:Property Name="Ref" Value="System.String" />
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Response" />
+                    <om:Property Name="Signal" Value="True" />
+                </om:Element>
+            </om:Element>
+        </om:Element>
+    </om:Element>
+</om:MetaModel>
+#endif // __DESIGNER_DATA
+[Microsoft.XLANGs.BaseTypes.BPELExportable(false)]
+module BizTalkSampleApplication
+{
+    internal porttype PortType_7
+    {
+        requestresponse DELETE
+        {
+            bLogical.RESTSchemas.BizTalkWebHttpRequest, System.String
+        };
+    };
+    [Microsoft.XLANGs.BaseTypes.BPELExportable(false)]
+    internal service ExposeDELETE
+    {
+        [Microsoft.XLANGs.BaseTypes.LogicalBinding()]
+        port implements PortType_7 RESTService;
+        message bLogical.RESTSchemas.BizTalkWebHttpRequest httpRequest;
+        message System.String httpResponse;
+        body ()
+        {
+            [Microsoft.XLANGs.BaseTypes.DesignerPosition("79c26956-1363-4c59-b45f-9b66c33309e6")]
+            activate ((bLogical.RESTSchemas.PropertySchema.HTTPMethod == "DELETE"))receive (RESTService.DELETE, httpRequest);
+            [Microsoft.XLANGs.BaseTypes.DesignerPosition("2f281a66-6dcd-4680-8c70-4a905e592927")]
+            construct httpResponse
+            {
+                [Microsoft.XLANGs.BaseTypes.DesignerPosition("2187027c-70da-4822-aa14-978cec79b4b9")]
+                httpResponse = "The event was deleted";
+            }
+            [Microsoft.XLANGs.BaseTypes.DesignerPosition("835b6583-0f86-4ffd-bdb5-36363d7348ee")]
+            send (RESTService.DELETE, httpResponse);
+        }
+    }
+}
+

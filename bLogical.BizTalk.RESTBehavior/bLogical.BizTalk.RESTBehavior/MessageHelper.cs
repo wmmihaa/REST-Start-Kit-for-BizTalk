@@ -102,7 +102,7 @@ namespace bLogical.BizTalk.RESTBehavior
                 foreach (var uriTemplate in uriTemplates)
                 {
                     Uri baseUri = new Uri(message.Headers.To.ToString().Replace(message.Headers.To.AbsolutePath, string.Empty));
-                    UriTemplateMatch results = uriTemplate.Match(baseUri, message.Headers.To);
+                    UriTemplateMatch results = uriTemplate.Match(listenUri, message.Headers.To);
 
                     if (results == null)
                         continue;

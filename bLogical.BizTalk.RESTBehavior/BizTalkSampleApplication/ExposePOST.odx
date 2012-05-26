@@ -1,0 +1,145 @@
+﻿#if __DESIGNER_DATA
+#error Do not define __DESIGNER_DATA.
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<om:MetaModel MajorVersion="1" MinorVersion="3" Core="2b131234-7959-458d-834f-2dc0769ce683" ScheduleModel="66366196-361d-448d-976f-cab5e87496d2" xmlns:om="http://schemas.microsoft.com/BizTalk/2003/DesignerData">
+    <om:Element Type="Module" OID="9546443c-0cba-4f7f-9e20-e619eacb6e18" LowerBound="1.1" HigherBound="33.1">
+        <om:Property Name="ReportToAnalyst" Value="True" />
+        <om:Property Name="Name" Value="BizTalkSampleApplication" />
+        <om:Property Name="Signal" Value="False" />
+        <om:Element Type="ServiceDeclaration" OID="fff4bfbf-e23e-4bf5-9a21-ec6871cf35f7" ParentLink="Module_ServiceDeclaration" LowerBound="11.1" HigherBound="32.1">
+            <om:Property Name="InitializedTransactionType" Value="False" />
+            <om:Property Name="IsInvokable" Value="False" />
+            <om:Property Name="TypeModifier" Value="Internal" />
+            <om:Property Name="ReportToAnalyst" Value="True" />
+            <om:Property Name="Name" Value="ExposePOST" />
+            <om:Property Name="Signal" Value="False" />
+            <om:Element Type="MessageDeclaration" OID="0d481577-e704-4def-9b57-4422f8baa283" ParentLink="ServiceDeclaration_MessageDeclaration" LowerBound="16.1" HigherBound="17.1">
+                <om:Property Name="Type" Value="BizTalkSampleApplication.Schemas.Event" />
+                <om:Property Name="ParamDirection" Value="In" />
+                <om:Property Name="ReportToAnalyst" Value="True" />
+                <om:Property Name="Name" Value="httpRequest" />
+                <om:Property Name="Signal" Value="True" />
+            </om:Element>
+            <om:Element Type="MessageDeclaration" OID="028c07e0-bdad-4f5e-9669-558f9200323d" ParentLink="ServiceDeclaration_MessageDeclaration" LowerBound="17.1" HigherBound="18.1">
+                <om:Property Name="Type" Value="System.String" />
+                <om:Property Name="ParamDirection" Value="In" />
+                <om:Property Name="ReportToAnalyst" Value="True" />
+                <om:Property Name="Name" Value="httpResponse" />
+                <om:Property Name="Signal" Value="True" />
+            </om:Element>
+            <om:Element Type="ServiceBody" OID="f9bd7210-65b5-4dae-8c46-8a611f74f69e" ParentLink="ServiceDeclaration_ServiceBody">
+                <om:Property Name="Signal" Value="False" />
+                <om:Element Type="Receive" OID="a460ed6b-1e93-44cc-9ebf-f5eedda85c55" ParentLink="ServiceBody_Statement" LowerBound="20.1" HigherBound="22.1">
+                    <om:Property Name="Activate" Value="True" />
+                    <om:Property Name="PortName" Value="RESTService" />
+                    <om:Property Name="MessageName" Value="httpRequest" />
+                    <om:Property Name="OperationName" Value="POST" />
+                    <om:Property Name="OperationMessageName" Value="Request" />
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Receive POST" />
+                    <om:Property Name="Signal" Value="True" />
+                </om:Element>
+                <om:Element Type="Construct" OID="98bbc8c7-6cc3-45f4-8d36-6fa3fee19ec4" ParentLink="ServiceBody_Statement" LowerBound="22.1" HigherBound="28.1">
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Construct Response" />
+                    <om:Property Name="Signal" Value="True" />
+                    <om:Element Type="MessageAssignment" OID="75a219b2-7640-4569-974d-e47fd4bbe4ef" ParentLink="ComplexStatement_Statement" LowerBound="25.1" HigherBound="27.1">
+                        <om:Property Name="Expression" Value="httpResponse = &quot;Event was added.&quot;;" />
+                        <om:Property Name="ReportToAnalyst" Value="False" />
+                        <om:Property Name="Name" Value="MessageAssignment_1" />
+                        <om:Property Name="Signal" Value="True" />
+                    </om:Element>
+                    <om:Element Type="MessageRef" OID="b37b60e8-dcc6-44ae-a63d-21b436ad2ee3" ParentLink="Construct_MessageRef" LowerBound="23.23" HigherBound="23.35">
+                        <om:Property Name="Ref" Value="httpResponse" />
+                        <om:Property Name="ReportToAnalyst" Value="True" />
+                        <om:Property Name="Signal" Value="False" />
+                    </om:Element>
+                </om:Element>
+                <om:Element Type="Send" OID="6e21f4c2-b2bc-4e44-b44f-0c3f1155e013" ParentLink="ServiceBody_Statement" LowerBound="28.1" HigherBound="30.1">
+                    <om:Property Name="PortName" Value="RESTService" />
+                    <om:Property Name="MessageName" Value="httpResponse" />
+                    <om:Property Name="OperationName" Value="POST" />
+                    <om:Property Name="OperationMessageName" Value="Response" />
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Send Response" />
+                    <om:Property Name="Signal" Value="True" />
+                </om:Element>
+            </om:Element>
+            <om:Element Type="PortDeclaration" OID="1b5bc484-c42e-4ef6-b5ff-19239c455a38" ParentLink="ServiceDeclaration_PortDeclaration" LowerBound="14.1" HigherBound="16.1">
+                <om:Property Name="PortModifier" Value="Implements" />
+                <om:Property Name="Orientation" Value="Left" />
+                <om:Property Name="PortIndex" Value="-1" />
+                <om:Property Name="IsWebPort" Value="False" />
+                <om:Property Name="OrderedDelivery" Value="False" />
+                <om:Property Name="DeliveryNotification" Value="None" />
+                <om:Property Name="Type" Value="BizTalkSampleApplication.PortType_9" />
+                <om:Property Name="ParamDirection" Value="In" />
+                <om:Property Name="ReportToAnalyst" Value="True" />
+                <om:Property Name="Name" Value="RESTService" />
+                <om:Property Name="Signal" Value="False" />
+                <om:Element Type="LogicalBindingAttribute" OID="d71f884f-b25d-448d-9540-8d16d5396149" ParentLink="PortDeclaration_CLRAttribute" LowerBound="14.1" HigherBound="15.1">
+                    <om:Property Name="Signal" Value="False" />
+                </om:Element>
+            </om:Element>
+        </om:Element>
+        <om:Element Type="PortType" OID="24832545-aef1-4814-82cf-2a8b7bb17d85" ParentLink="Module_PortType" LowerBound="4.1" HigherBound="11.1">
+            <om:Property Name="Synchronous" Value="True" />
+            <om:Property Name="TypeModifier" Value="Internal" />
+            <om:Property Name="ReportToAnalyst" Value="True" />
+            <om:Property Name="Name" Value="PortType_9" />
+            <om:Property Name="Signal" Value="False" />
+            <om:Element Type="OperationDeclaration" OID="dfb0fb24-434c-4404-87d5-ccc43b5a97e1" ParentLink="PortType_OperationDeclaration" LowerBound="6.1" HigherBound="10.1">
+                <om:Property Name="OperationType" Value="RequestResponse" />
+                <om:Property Name="ReportToAnalyst" Value="True" />
+                <om:Property Name="Name" Value="POST" />
+                <om:Property Name="Signal" Value="True" />
+                <om:Element Type="MessageRef" OID="8675225b-81d6-463e-97a6-02fdc2bf41ed" ParentLink="OperationDeclaration_RequestMessageRef" LowerBound="8.13" HigherBound="8.26">
+                    <om:Property Name="Ref" Value="BizTalkSampleApplication.Schemas.Event" />
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Request" />
+                    <om:Property Name="Signal" Value="True" />
+                </om:Element>
+                <om:Element Type="MessageRef" OID="2a638d36-0322-4cd9-8709-d46f25e914a2" ParentLink="OperationDeclaration_ResponseMessageRef" LowerBound="8.28" HigherBound="8.41">
+                    <om:Property Name="Ref" Value="System.String" />
+                    <om:Property Name="ReportToAnalyst" Value="True" />
+                    <om:Property Name="Name" Value="Response" />
+                    <om:Property Name="Signal" Value="True" />
+                </om:Element>
+            </om:Element>
+        </om:Element>
+    </om:Element>
+</om:MetaModel>
+#endif // __DESIGNER_DATA
+[Microsoft.XLANGs.BaseTypes.BPELExportable(false)]
+module BizTalkSampleApplication
+{
+    internal porttype PortType_9
+    {
+        requestresponse POST
+        {
+            Schemas.Event, System.String
+        };
+    };
+    [Microsoft.XLANGs.BaseTypes.BPELExportable(false)]
+    internal service ExposePOST
+    {
+        [Microsoft.XLANGs.BaseTypes.LogicalBinding()]
+        port implements PortType_9 RESTService;
+        message Schemas.Event httpRequest;
+        message System.String httpResponse;
+        body ()
+        {
+            [Microsoft.XLANGs.BaseTypes.DesignerPosition("a460ed6b-1e93-44cc-9ebf-f5eedda85c55")]
+            activate receive (RESTService.POST, httpRequest);
+            [Microsoft.XLANGs.BaseTypes.DesignerPosition("98bbc8c7-6cc3-45f4-8d36-6fa3fee19ec4")]
+            construct httpResponse
+            {
+                [Microsoft.XLANGs.BaseTypes.DesignerPosition("75a219b2-7640-4569-974d-e47fd4bbe4ef")]
+                httpResponse = "Event was added.";
+            }
+            [Microsoft.XLANGs.BaseTypes.DesignerPosition("6e21f4c2-b2bc-4e44-b44f-0c3f1155e013")]
+            send (RESTService.POST, httpResponse);
+        }
+    }
+}
+

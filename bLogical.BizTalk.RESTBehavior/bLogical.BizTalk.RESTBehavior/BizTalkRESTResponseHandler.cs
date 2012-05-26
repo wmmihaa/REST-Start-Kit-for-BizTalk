@@ -35,9 +35,6 @@ namespace bLogical.BizTalk.RESTBehavior
                     break;
             }
 
-            // Debug
-            string s = MessageHelper.CastMessageFormat(ref request, WebContentFormat.Xml);
-
             return null;
         }
         public void BeforeSendReply(ref System.ServiceModel.Channels.Message reply, object correlationState)

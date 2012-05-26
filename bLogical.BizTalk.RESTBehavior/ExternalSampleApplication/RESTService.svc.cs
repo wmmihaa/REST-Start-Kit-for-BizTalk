@@ -18,10 +18,10 @@ namespace ExternalSampleApplication
             return new Event { Date = "2012-05-01", Id = id, Name = "Some Event" };
         }
         [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/Events")]
+        [WebInvoke(Method = "POST", UriTemplate = "")]
         public string AddEvent(Event e)
         {
-            return "Person been added";
+            return "Event has been added";
         }
         [OperationContract]
         [WebInvoke(Method = "DELETE", UriTemplate = "/Events/{id}")]
