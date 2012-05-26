@@ -67,7 +67,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Event.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RESTService.svc.cs">
       <DependentUpon>RESTService.svc</DependentUpon>

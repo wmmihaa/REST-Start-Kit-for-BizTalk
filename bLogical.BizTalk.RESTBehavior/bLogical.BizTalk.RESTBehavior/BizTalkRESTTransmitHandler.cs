@@ -8,6 +8,8 @@ using System.ServiceModel;
 using System.Xml.Schema;
 using System.ServiceModel.Dispatcher;
 using System.ServiceModel.Description;
+using System.IO;
+using System.Xml;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
@@ -49,34 +51,75 @@ namespace bLogical.BizTalk.RESTBehavior
     {
         public static readonly XNamespace BizTalkWebHttpNs = "http://bLogical.RESTSchemas.BizTalkWebHttpRequest/1.0";
         public static readonly XName Request = BizTalkWebHttpNs + "bizTalkWebHttpRequest";
-        public static readonly XName Header = BizTalkWebHttpNs + "header";
-        public static readonly XName Param = BizTalkWebHttpNs + "param";
+        public static readonly XName Header = BizTalkWebHttpNs + "headers";
+        public static readonly XName Param = BizTalkWebHttpNs + "params";
         public static readonly XName Body = BizTalkWebHttpNs + "body";
-
+        public static readonly string OPERATION = "http://schemas.microsoft.com/BizTalk/2003/system-properties#Operation";
         public object BeforeSendRequest(ref Message request, IClientChannel channel)
         {
             var requestBody = XElement.Load(request.GetReaderAtBodyContents());
-            if (requestBody.Name != Request)
+            if (request.Headers.Action == "POST")
             {
-                throw new XmlSchemaValidationException("Invalid request message. Expected " +
-                Request + ", but got " + requestBody.Name + ".");
+                MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(requestBody.ToString()));
+                XmlReader reader = XmlReader.Create(ms);
+
+                request = Message.CreateMessage(request.Version, request.Headers.Action, reader);
+
+                HttpRequestMessageProperty httpRequestMessageProperty = new HttpRequestMessageProperty();
+                httpRequestMessageProperty.Method = "POST";
+                httpRequestMessageProperty.QueryString = string.Empty;
+                httpRequestMessageProperty.SuppressEntityBody = false;
+                httpRequestMessageProperty.Headers.Add("Content-Type", "application/xml; charset=utf-8");
+                httpRequestMessageProperty.Headers.Add("Accept", "application/xml; charset=utf-8");
+
+                foreach (var property in request.Properties)
+                    request.Properties.Add(property.Key, property.Value);
+
+                request.Headers.To = channel.RemoteAddress.Uri;
+                return null;
+
             }
-            var bodyElement = requestBody.Element(Body);
-            var requestMessageProperty = new HttpRequestMessageProperty
+            else if (request.Headers.Action == "PUT")
             {
-                Method = requestBody.Attribute("Method").Value,
-                SuppressEntityBody = bodyElement == null
-            };
-            
-            var uriTemplate = new UriTemplate(requestBody.Attribute("UriTemplate").Value);
 
-            request = Message.CreateMessage(request.Version, request.Headers.Action);
+            }
+            if (request.Headers.Action == "GET" || request.Headers.Action == "DELETE")
+            {
 
-            request.Headers.To = uriTemplate.BindByName(channel.RemoteAddress.Uri,
-                requestBody.Elements(Param).ToDictionary( e => e.Attribute("name").Value, e => e.Value));
+                if (requestBody.Name != Request)
+                {
+                    throw new XmlSchemaValidationException("Invalid request message. Expected " +
+                    Request + ", but got " + requestBody.Name + ".");
+                }
+                var requestMessageProperty = new HttpRequestMessageProperty
+                {
+                    Method = requestBody.Attribute("method") == null ? request.Headers.Action : requestBody.Attribute("method").Value,
+                    SuppressEntityBody = true
+                };
+                foreach (var header in requestBody.Elements(Header).Elements())
+                {
+                    requestMessageProperty.Headers.Add(
+                        header.Attribute("name").Value,
+                        header.Value);
+                }
+                var uriTemplate = new UriTemplate(requestBody.Attribute("uriTemplate").Value);
 
-            request.Properties[HttpRequestMessageProperty.Name] = requestMessageProperty;
+                request = Message.CreateMessage(MessageVersion.None, request.Headers.Action+"Action");
+
+                var bodyElement = requestBody.Element(Body);
+
+                request = bodyElement == null
+                    ? Message.CreateMessage(request.Version, request.Headers.Action)
+                    : Message.CreateMessage(request.Version, request.Headers.Action, bodyElement.ToString());
+
+
+                Dictionary<string,string> dic = requestBody.Elements(BizTalkWebHttpNs + "params").Elements().ToDictionary(e => e.Attribute("name").Value, e => e.Value);
+
+                request.Headers.To = uriTemplate.BindByName(channel.RemoteAddress.Uri,dic);
+                request.Properties[HttpRequestMessageProperty.Name] = requestMessageProperty;
+            }
             return null;
+            
         }
 
         public void AfterReceiveReply(ref Message reply, object correlationState)

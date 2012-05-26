@@ -112,10 +112,6 @@
       <TypeName>Transform_POST</TypeName>
       <Namespace>RESTDEMO</Namespace>
     </Map>
-    <XLang Include="TransmitEventOrchestration.odx">
-      <TypeName>TransmitEventOrchestration</TypeName>
-      <Namespace>RESTDEMO</Namespace>
-    </XLang>
     <XLang Include="GetEventOrchestration.odx">
       <TypeName>GetEventOrchestration</TypeName>
       <Namespace>RESTDEMO</Namespace>
@@ -126,6 +122,22 @@
     </XLang>
     <XLang Include="CreateEventOrchestration.odx">
       <TypeName>CreateEventOrchestration</TypeName>
+      <Namespace>RESTDEMO</Namespace>
+    </XLang>
+    <Map Include="Transform_GET_Transmit.btm">
+      <TypeName>Transform_GET_Transmit</TypeName>
+      <Namespace>RESTDEMO</Namespace>
+    </Map>
+    <Map Include="Transform_DELETE_Transmit.btm">
+      <TypeName>Transform_DELETE_Transmit</TypeName>
+      <Namespace>RESTDEMO</Namespace>
+    </Map>
+    <XLang Include="ConsumeGETOrchestration.odx">
+      <TypeName>ConsumeGETOrchestration</TypeName>
+      <Namespace>RESTDEMO</Namespace>
+    </XLang>
+    <XLang Include="ConsumePOSTOrchestration.odx">
+      <TypeName>ConsumePOSTOrchestration</TypeName>
       <Namespace>RESTDEMO</Namespace>
     </XLang>
     <Content Include="WcfSendPort_SqlAdapterBinding_Custom.bindinginfo.xml" />

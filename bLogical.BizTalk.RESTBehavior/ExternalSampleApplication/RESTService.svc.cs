@@ -30,12 +30,15 @@ namespace ExternalSampleApplication
             //return "Person been deleted";
         }
     }
-    [DataContract]
-    public class Person
+    [DataContract(Namespace="http://RESTDEMO.Event")]
+    public class Event
     { 
-        [DataMember]
-        public string FirstName { get; set; }
-        [DataMember]
-        public string LastName { get; set; }
+        [DataMember(Order=0)]
+        public string Id { get; set; }
+        [DataMember(Order = 1)]
+        public string Date { get; set; }
+        [DataMember(Order = 2)]
+        public string Name { get; set; }
     }
+
 }

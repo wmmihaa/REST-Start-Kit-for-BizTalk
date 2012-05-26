@@ -74,6 +74,13 @@
                     <om:Property Name="ReportToAnalyst" Value="True" />
                     <om:Property Name="Name" Value="DELETE" />
                     <om:Property Name="Signal" Value="True" />
+                    <om:Element Type="DNFPredicate" OID="9e165c5b-8406-409e-a467-b7cffc3a2780" ParentLink="Receive_DNFPredicate">
+                        <om:Property Name="LHS" Value="bLogical.RESTSchemas.PropertySchema.HTTPMethod" />
+                        <om:Property Name="RHS" Value="&quot;DELETE&quot;" />
+                        <om:Property Name="Grouping" Value="AND" />
+                        <om:Property Name="Operator" Value="Equals" />
+                        <om:Property Name="Signal" Value="False" />
+                    </om:Element>
                 </om:Element>
                 <om:Element Type="Construct" OID="06909f07-21e7-4420-bbb4-4359c5f4b04b" ParentLink="ServiceBody_Statement" LowerBound="32.1" HigherBound="38.1">
                     <om:Property Name="ReportToAnalyst" Value="True" />
@@ -219,7 +226,7 @@ module RESTDEMO
         body ()
         {
             [Microsoft.XLANGs.BaseTypes.DesignerPosition("8e8cef56-987e-4786-b1f9-91457b9459d0")]
-            activate receive (EventService.DeleteEvent, httpDELETE);
+            activate ((bLogical.RESTSchemas.PropertySchema.HTTPMethod == "DELETE"))receive (EventService.DeleteEvent, httpDELETE);
             [Microsoft.XLANGs.BaseTypes.DesignerPosition("06909f07-21e7-4420-bbb4-4359c5f4b04b")]
             construct msgDeleteRequest
             {
