@@ -58,7 +58,7 @@ namespace bLogical.BizTalk.RESTBehavior
         public object BeforeSendRequest(ref Message request, IClientChannel channel)
         {
             var requestBody = XElement.Load(request.GetReaderAtBodyContents());
-            if (request.Headers.Action == "POST")
+            if (request.Headers.Action == "POST" || request.Headers.Action == "PUT")
             {
                 MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(requestBody.ToString()));
                 XmlReader reader = XmlReader.Create(ms);
@@ -66,7 +66,7 @@ namespace bLogical.BizTalk.RESTBehavior
                 request = Message.CreateMessage(request.Version, request.Headers.Action, reader);
 
                 HttpRequestMessageProperty httpRequestMessageProperty = new HttpRequestMessageProperty();
-                httpRequestMessageProperty.Method = "POST";
+                httpRequestMessageProperty.Method = request.Headers.Action;
                 httpRequestMessageProperty.QueryString = string.Empty;
                 httpRequestMessageProperty.SuppressEntityBody = false;
                 httpRequestMessageProperty.Headers.Add("Content-Type", "application/xml; charset=utf-8");
@@ -79,13 +79,8 @@ namespace bLogical.BizTalk.RESTBehavior
                 return null;
 
             }
-            else if (request.Headers.Action == "PUT")
-            {
-
-            }
             if (request.Headers.Action == "GET" || request.Headers.Action == "DELETE")
             {
-
                 if (requestBody.Name != Request)
                 {
                     throw new XmlSchemaValidationException("Invalid request message. Expected " +

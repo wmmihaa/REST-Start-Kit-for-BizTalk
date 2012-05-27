@@ -12,15 +12,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		bLogical.BizTalk.RESTBehavior\WCF-Custom.BindingsExtension-SendHandler.config = bLogical.BizTalk.RESTBehavior\WCF-Custom.BindingsExtension-SendHandler.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RESTDEMO", "RESTDEMO\RESTDEMO.btproj", "{EDE90034-7C7A-41BE-B6D7-AA0C483D0CCC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalSampleApplication", "ExternalSampleApplication\ExternalSampleApplication.csproj", "{0396AE06-40DA-4F86-AC69-9B6A2A1A9C85}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizTalkSampleApplication", "BizTalkSampleApplication\BizTalkSampleApplication.btproj", "{1507F904-B639-4BCD-AFF3-F62B70BED7B1}"
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
+		SccNumberOfProjects = 5
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs06
 		SccLocalPath0 = .
@@ -30,15 +28,12 @@ Global
 		SccProjectUniqueName2 = bLogical.RESTSchemas\\bLogical.RESTSchemas.btproj
 		SccProjectName2 = bLogical.RESTSchemas
 		SccLocalPath2 = bLogical.RESTSchemas
-		SccProjectUniqueName3 = RESTDEMO\\RESTDEMO.btproj
-		SccProjectName3 = RESTDEMO
-		SccLocalPath3 = RESTDEMO
-		SccProjectUniqueName4 = ExternalSampleApplication\\ExternalSampleApplication.csproj
-		SccProjectName4 = ExternalSampleApplication
-		SccLocalPath4 = ExternalSampleApplication
-		SccProjectUniqueName5 = BizTalkSampleApplication\\BizTalkSampleApplication.btproj
-		SccProjectName5 = BizTalkSampleApplication
-		SccLocalPath5 = BizTalkSampleApplication
+		SccProjectUniqueName3 = ExternalSampleApplication\\ExternalSampleApplication.csproj
+		SccProjectName3 = ExternalSampleApplication
+		SccLocalPath3 = ExternalSampleApplication
+		SccProjectUniqueName4 = BizTalkSampleApplication\\BizTalkSampleApplication.btproj
+		SccProjectName4 = BizTalkSampleApplication
+		SccLocalPath4 = BizTalkSampleApplication
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,10 +49,6 @@ Global
 		{06FB0471-17F1-4595-B734-C237047E3BD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06FB0471-17F1-4595-B734-C237047E3BD3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{06FB0471-17F1-4595-B734-C237047E3BD3}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{EDE90034-7C7A-41BE-B6D7-AA0C483D0CCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EDE90034-7C7A-41BE-B6D7-AA0C483D0CCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EDE90034-7C7A-41BE-B6D7-AA0C483D0CCC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EDE90034-7C7A-41BE-B6D7-AA0C483D0CCC}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{0396AE06-40DA-4F86-AC69-9B6A2A1A9C85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0396AE06-40DA-4F86-AC69-9B6A2A1A9C85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0396AE06-40DA-4F86-AC69-9B6A2A1A9C85}.Release|Any CPU.ActiveCfg = Release|Any CPU
