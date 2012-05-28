@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ This code originates from Nitin Mehrotra.
+ http://social.technet.microsoft.com/wiki/contents/articles/2474.invoke-restful-web-services-with-biztalk-server-2010.aspx
+ */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,10 +14,14 @@ using System.ServiceModel.Dispatcher;
 using System.ServiceModel.Description;
 using System.IO;
 using System.Xml;
+using System.ServiceModel.Configuration;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
-    public class BizTalkRESTTransmitHandlerExtensionElement : System.ServiceModel.Configuration.BehaviorExtensionElement
+    /// <summary>
+    /// Represents a configuration element that contains sub-elements that specify behavior extensions, which enable the user to customize service or endpoint behaviors.
+    /// </summary>
+    public class BizTalkRESTTransmitHandlerExtensionElement : BehaviorExtensionElement
     {
         public override Type BehaviorType
         {
@@ -25,6 +33,10 @@ namespace bLogical.BizTalk.RESTBehavior
             return new BizTalkRESTTransmitHandlerEndpointBehavior();
         }
     }
+    /// <summary>
+    /// Implements methods that can be used to extend run-time behavior for an endpoint in either a service or client application.
+    /// Adds the BizTalkRESTTransmitHandler behavior
+    /// </summary>
     public class BizTalkRESTTransmitHandlerEndpointBehavior : IEndpointBehavior
     {
         public void AddBindingParameters(ServiceEndpoint endpoint, BindingParameterCollection bindingParameters)
@@ -47,6 +59,9 @@ namespace bLogical.BizTalk.RESTBehavior
 
         }
     }
+    /// <summary>
+    /// Defines a message inspector object that can be added to the MessageInspectors collection to view or modify messages.
+    /// </summary>
     public class BizTalkRESTTransmitHandler : IClientMessageInspector
     {
         public static readonly XNamespace BizTalkWebHttpNs = "http://bLogical.RESTSchemas.BizTalkWebHttpRequest/1.0";
@@ -65,10 +80,13 @@ namespace bLogical.BizTalk.RESTBehavior
 
                 request = Message.CreateMessage(request.Version, request.Headers.Action, reader);
 
-                HttpRequestMessageProperty httpRequestMessageProperty = new HttpRequestMessageProperty();
-                httpRequestMessageProperty.Method = request.Headers.Action;
-                httpRequestMessageProperty.QueryString = string.Empty;
-                httpRequestMessageProperty.SuppressEntityBody = false;
+                var httpRequestMessageProperty = new HttpRequestMessageProperty
+                {
+                    Method = request.Headers.Action,
+                    QueryString=string.Empty,
+                    SuppressEntityBody = false,
+                };
+
                 httpRequestMessageProperty.Headers.Add("Content-Type", "application/xml; charset=utf-8");
                 httpRequestMessageProperty.Headers.Add("Accept", "application/xml; charset=utf-8");
 

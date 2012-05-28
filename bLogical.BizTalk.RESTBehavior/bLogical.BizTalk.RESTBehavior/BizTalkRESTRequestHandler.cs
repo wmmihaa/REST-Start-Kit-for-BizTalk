@@ -16,10 +16,14 @@ using System.Runtime.Serialization.Json;
 using Newtonsoft.Json.Converters;
 using System.Configuration;
 using System.ComponentModel;
+using System.ServiceModel.Configuration;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
-    public class BizTalkRESTRequestHandlerExtensionElement : System.ServiceModel.Configuration.BehaviorExtensionElement
+    /// <summary>
+    /// Represents a configuration element that contains sub-elements that specify behavior extensions, which enable the user to customize service or endpoint behaviors.
+    /// </summary>
+    public class BizTalkRESTRequestHandlerExtensionElement : BehaviorExtensionElement
     {
         [ConfigurationProperty("uriTemplates", DefaultValue = "", IsRequired = false)]
         public string UriTemplates
@@ -56,6 +60,10 @@ namespace bLogical.BizTalk.RESTBehavior
             return bizTalkWebHttpBehavior;
         }
     }
+    /// <summary>
+    /// Enables the Web programming model for a service. Adds the BizTalkRESTRequestHandler Operation Selector along
+    /// with the BizTalkRESTResponseHandler (MessageInspector)
+    /// </summary>
     public class BizTalkRESTRequestHandlerBehavior : WebHttpBehavior
     {
         public BizTalkRESTRequestHandlerBehavior()
@@ -73,6 +81,9 @@ namespace bLogical.BizTalk.RESTBehavior
             base.ApplyDispatchBehavior(endpoint, endpointDispatcher);
         }
     }
+    /// <summary>
+    /// The operation selector that supports the Web programming model.
+    /// </summary>
     public class BizTalkRESTRequestHandler : WebHttpDispatchOperationSelector
     {
         public List<UriTemplate> uriTemplates { get; set; }
@@ -89,6 +100,19 @@ namespace bLogical.BizTalk.RESTBehavior
             return result;
         }
 
+        /// <summary>
+        /// This where all starts. Depending on the HTTP verb the following actions is preformed:
+        /// GET|DELETE: 
+        /// A new BizTalkWebHttpRequest message is generated from the URI parameters, and passed on 
+        /// to BizTalk with the content type set to HTTP POST.
+        /// 
+        /// POST|PUT: 
+        /// Nothing is done, unless the incoming content type is set to application/json, in which case 
+        /// the incoming JSON message is casted to an XML message
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="uriMatched"></param>
+        /// <returns></returns>
         protected override string SelectOperation(ref Message message, out bool uriMatched)
         {
             HttpRequestMessageProperty httpProp = (HttpRequestMessageProperty)message.Properties[HttpRequestMessageProperty.Name];
@@ -101,6 +125,8 @@ namespace bLogical.BizTalk.RESTBehavior
             }
 
             uriMatched = true;
+
+            // The TwoWayMethod is the only method exposed from BizTalk
             return "TwoWayMethod";
         }
 

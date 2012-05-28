@@ -13,34 +13,34 @@ using System.ServiceModel.Web;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
+    /// <summary>
+    /// Defines the methods that enable custom inspection or modification of inbound and outbound application messages in service applications.
+    /// </summary>
     public class BizTalkRESTResponseHandler : IDispatchMessageInspector
     {
+        /// <summary>
+        /// Adds the httpRequest header to the operation context
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="channel"></param>
+        /// <param name="instanceContext"></param>
+        /// <returns></returns>
         public object AfterReceiveRequest(ref System.ServiceModel.Channels.Message request, IClientChannel channel, InstanceContext instanceContext)
         {
-            Trace.WriteLine("AfterReceiveRequest called.","bLogical");
             HttpRequestMessageProperty httpProp = (HttpRequestMessageProperty)request.Properties[HttpRequestMessageProperty.Name];
 
-            switch (httpProp.Method)
-            {
-                case "GET":
-                    OperationContext.Current.Extensions.Add(new RequestContext { RequestHeader = request.Properties["httpRequest"] as HttpRequestMessageProperty });
-                    break;
-                case "DELETE":
-                    break;    
-                case "POST":
-                    break;
-                case "PUT":
-                    break;
-                default:
-                    break;
-            }
+            OperationContext.Current.Extensions.Add(new RequestContext { RequestHeader = request.Properties["httpRequest"] as HttpRequestMessageProperty });
 
             return null;
         }
+        /// <summary>
+        /// Reads the httpRequest in the operation context and casts the respose to JSON 
+        /// if the Accept header is set to application/json
+        /// </summary>
+        /// <param name="reply"></param>
+        /// <param name="correlationState"></param>
         public void BeforeSendReply(ref System.ServiceModel.Channels.Message reply, object correlationState)
         {
-            Trace.WriteLine("BeforeSendReply called.", "bLogical");
-
             var ctx = OperationContext.Current.Extensions.Find<RequestContext>();
 
             if (ctx != null && 
@@ -84,45 +84,3 @@ namespace bLogical.BizTalk.RESTBehavior
     }
 
 }
-
-
-
-
-/*
- public class BizTalkWebHttpMessageInspectorExtensionElement : System.ServiceModel.Configuration.BehaviorExtensionElement
-    {
-        public override Type BehaviorType
-        {
-            get { return typeof(BizTalkWebHttpMessageInspectorEndpointBehavior); }
-        }
-
-        protected override object CreateBehavior()
-        {
-            return new BizTalkWebHttpMessageInspectorEndpointBehavior();
-        }
-    }
-    public class BizTalkWebHttpMessageInspectorEndpointBehavior : IEndpointBehavior
-    {
-        public void AddBindingParameters(ServiceEndpoint endpoint, BindingParameterCollection bindingParameters)
-        {
-
-        }
-
-        public void ApplyClientBehavior(ServiceEndpoint endpoint, ClientRuntime clientRuntime)
-        {
-
-        }
-
-        public void ApplyDispatchBehavior(ServiceEndpoint endpoint, EndpointDispatcher endpointDispatcher)
-        {
-            endpointDispatcher.DispatchRuntime.MessageInspectors.Add(new BizTalkWebHttpMessageInspector());
-
-        }
-
-        public void Validate(ServiceEndpoint endpoint)
-        {
-
-        }
-    }
- 
- */
