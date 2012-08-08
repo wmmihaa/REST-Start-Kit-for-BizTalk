@@ -70,6 +70,7 @@ namespace bLogical.BizTalk.RESTBehavior
         public static readonly XName Param = BizTalkWebHttpNs + "params";
         public static readonly XName Body = BizTalkWebHttpNs + "body";
         public static readonly string OPERATION = "http://schemas.microsoft.com/BizTalk/2003/system-properties#Operation";
+
         public object BeforeSendRequest(ref Message request, IClientChannel channel)
         {
             var requestBody = XElement.Load(request.GetReaderAtBodyContents());
@@ -78,22 +79,42 @@ namespace bLogical.BizTalk.RESTBehavior
                 MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(requestBody.ToString()));
                 XmlReader reader = XmlReader.Create(ms);
 
+                string[] userHeaders = request.Properties["http://schemas.microsoft.com/BizTalk/2003/http-properties#UserHttpHeaders"].ToString().Split('\n');
+
+                string extendedUriPath = string.Empty;
+                if (request.Properties.ContainsKey("https://bLogical.RESTSchemas.PropertySchema#ExtendedUriPath"))
+                {
+                    extendedUriPath = request.Properties["https://bLogical.RESTSchemas.PropertySchema#ExtendedUriPath"].ToString();
+                }
+
                 request = Message.CreateMessage(request.Version, request.Headers.Action, reader);
 
                 var httpRequestMessageProperty = new HttpRequestMessageProperty
                 {
                     Method = request.Headers.Action,
-                    QueryString=string.Empty,
+                    QueryString = string.Empty,
                     SuppressEntityBody = false,
                 };
 
                 httpRequestMessageProperty.Headers.Add("Content-Type", "application/xml; charset=utf-8");
                 httpRequestMessageProperty.Headers.Add("Accept", "application/xml; charset=utf-8");
 
+                foreach (string header in userHeaders)
+                {
+                    string[] s = header.Split(':');
+                    httpRequestMessageProperty.Headers.Add(s[0], s[1]);
+                }
+
                 foreach (var property in request.Properties)
                     request.Properties.Add(property.Key, property.Value);
 
-                request.Headers.To = channel.RemoteAddress.Uri;
+                if (string.IsNullOrEmpty(extendedUriPath))
+                {
+                    request.Headers.To = channel.RemoteAddress.Uri;
+                }
+                
+                request.Properties[HttpRequestMessageProperty.Name] = httpRequestMessageProperty;
+
                 return null;
 
             }
@@ -117,7 +138,7 @@ namespace bLogical.BizTalk.RESTBehavior
                 }
                 var uriTemplate = new UriTemplate(requestBody.Attribute("uriTemplate").Value);
 
-                request = Message.CreateMessage(MessageVersion.None, request.Headers.Action+"Action");
+                request = Message.CreateMessage(MessageVersion.None, request.Headers.Action + "Action");
 
                 var bodyElement = requestBody.Element(Body);
 
@@ -126,18 +147,18 @@ namespace bLogical.BizTalk.RESTBehavior
                     : Message.CreateMessage(request.Version, request.Headers.Action, bodyElement.ToString());
 
 
-                Dictionary<string,string> dic = requestBody.Elements(BizTalkWebHttpNs + "params").Elements().ToDictionary(e => e.Attribute("name").Value, e => e.Value);
+                Dictionary<string, string> dic = requestBody.Elements(BizTalkWebHttpNs + "params").Elements().ToDictionary(e => e.Attribute("name").Value, e => e.Value);
 
-                request.Headers.To = uriTemplate.BindByName(channel.RemoteAddress.Uri,dic);
+                request.Headers.To = uriTemplate.BindByName(channel.RemoteAddress.Uri, dic);
                 request.Properties[HttpRequestMessageProperty.Name] = requestMessageProperty;
             }
             return null;
-            
+
         }
 
         public void AfterReceiveReply(ref Message reply, object correlationState)
         {
             // do nothing
         }
-    } 
+    }
 }
