@@ -1,15 +1,13 @@
-using System;
-using System.ServiceModel.Dispatcher;
-using System.ServiceModel.Description;
-using System.ServiceModel.Channels;
-using System.Xml;
-using System.ServiceModel;
-using System.Diagnostics;
-using System.IO;
-using Newtonsoft.Json;
-using System.Text;
+using System.Linq;
 using System.Runtime.Serialization.Json;
+using System.ServiceModel;
+using System.ServiceModel.Channels;
+using System.ServiceModel.Dispatcher;
 using System.ServiceModel.Web;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
+using Newtonsoft.Json;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
@@ -43,19 +41,32 @@ namespace bLogical.BizTalk.RESTBehavior
         {
             var ctx = OperationContext.Current.Extensions.Find<RequestContext>();
 
-            if (ctx != null && 
-                ctx.RequestHeader.Headers["Accept"] != null && 
+            if (ctx != null &&
+                ctx.RequestHeader.Headers["Accept"] != null &&
                 ctx.RequestHeader.Headers["Accept"].ToString().ToLower().Contains("application/json"))
             {
                 XmlDictionaryReader dicReader = reply.GetReaderAtBodyContents();
+
+                // Remove namespaces from json
                 XmlDocument doc = new XmlDocument();
                 doc.Load(dicReader);
+                XElement xmlDocumentWithoutNs = RemoveAllNamespaces(XElement.Parse(doc.OuterXml));
+                string xml = xmlDocumentWithoutNs.ToString();
+                doc.LoadXml(xml);
+
                 string jsonString = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.None, true);
 
                 byte[] jsonReplyBytes = Encoding.UTF8.GetBytes(jsonString);
                 XmlDictionaryReader newReplyBodyReader = JsonReaderWriterFactory.CreateJsonReader(jsonReplyBytes, XmlDictionaryReaderQuotas.Max);
+
                 Message newReply = Message.CreateMessage(MessageVersion.None, null, newReplyBodyReader);
                 newReply.Properties.Add("Content-Type", "application/json;charset=utf-8");
+                newReply.Properties.Add("Accept", "application/json;charset=utf-8");
+
+                // Set the outgoing Content-Type to application/json
+                HttpResponseMessageProperty prop = new HttpResponseMessageProperty();
+                newReply.Properties.Add(HttpResponseMessageProperty.Name, prop);
+                prop.Headers.Add("Content-Type", "application/json;charset=utf-8");
 
                 WebBodyFormatMessageProperty bodyFormat = new WebBodyFormatMessageProperty(WebContentFormat.Json);
                 newReply.Properties.Add(WebBodyFormatMessageProperty.Name, bodyFormat);
@@ -64,8 +75,22 @@ namespace bLogical.BizTalk.RESTBehavior
 
                 reply = newReply;
             }
-            
+
             OperationContext.Current.Extensions.Remove(ctx);
+        }
+        private static XElement RemoveAllNamespaces(XElement xmlDocument)
+        {
+            if (!xmlDocument.HasElements)
+            {
+                XElement xElement = new XElement(xmlDocument.Name.LocalName);
+                xElement.Value = xmlDocument.Value;
+
+                foreach (XAttribute attribute in xmlDocument.Attributes())
+                    xElement.Add(attribute);
+
+                return xElement;
+            }
+            return new XElement(xmlDocument.Name.LocalName, xmlDocument.Elements().Select(el => RemoveAllNamespaces(el)));
         }
     }
 
@@ -74,15 +99,13 @@ namespace bLogical.BizTalk.RESTBehavior
         public HttpRequestMessageProperty RequestHeader { get; set; }
         public void Attach(OperationContext owner)
         {
-            
+
         }
 
         public void Detach(OperationContext owner)
         {
-            
+
         }
     }
 
 }
-
-

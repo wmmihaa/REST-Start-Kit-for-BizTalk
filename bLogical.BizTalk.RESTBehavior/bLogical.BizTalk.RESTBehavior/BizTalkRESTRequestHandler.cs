@@ -1,22 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Configuration;
+using System.IO;
+using System.Runtime.Serialization.Json;
+using System.ServiceModel.Channels;
+using System.ServiceModel.Configuration;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
-using System.ServiceModel.Channels;
-using System.IO;
+using System.Text;
 using System.Xml;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Diagnostics;
-using System.Xml.Linq;
 using Newtonsoft.Json;
-using System.Runtime.Serialization.Json;
 using Newtonsoft.Json.Converters;
-using System.Configuration;
-using System.ComponentModel;
-using System.ServiceModel.Configuration;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
@@ -117,7 +111,7 @@ namespace bLogical.BizTalk.RESTBehavior
         {
             HttpRequestMessageProperty httpProp = (HttpRequestMessageProperty)message.Properties[HttpRequestMessageProperty.Name];
 
-            if(httpProp.Method=="GET" || httpProp.Method=="DELETE")
+            if (httpProp.Method == "GET" || httpProp.Method == "DELETE")
                 message = ConvertToURIRequest(message);
             else if ((httpProp.Method == "POST" || httpProp.Method == "PUT") && ((HttpRequestMessageProperty)message.Properties["httpRequest"]).Headers.ToString().ToLower().Contains("application/json"))
             {
@@ -158,19 +152,17 @@ namespace bLogical.BizTalk.RESTBehavior
                 MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(requestBody));
                 XmlReader reader = XmlReader.Create(ms);
 
-                newRequest = Message.CreateMessage(MessageVersion.None, "GetRequest", reader);
+                newRequest = Message.CreateMessage(MessageVersion.None, "GET", reader);
 
-                HttpRequestMessageProperty httpRequestMessageProperty = new HttpRequestMessageProperty();
-                httpRequestMessageProperty.Method = "POST";
-                httpRequestMessageProperty.QueryString = string.Empty;
-                httpRequestMessageProperty.SuppressEntityBody = false;
-                httpRequestMessageProperty.Headers.Add("SOAPAction", "GetRequest");
-                httpRequestMessageProperty.Headers.Add("Content-Type", "text/xml; charset=utf-8");
+                // To support Azure Service Bus Relay
+                newRequest.Headers.To = message.Headers.To;
+                newRequest.Headers.Action = message.Headers.Action;
+
+                // newRequest.Headers.CopyHeadersFrom(message);
 
                 foreach (var property in message.Properties)
                     newRequest.Properties.Add(property.Key, property.Value);
 
-                newRequest.Headers.CopyHeadersFrom(message);
             }
             catch (Exception ex)
             {
@@ -179,6 +171,6 @@ namespace bLogical.BizTalk.RESTBehavior
             return newRequest;
         }
 
-        
+
     }
 }
