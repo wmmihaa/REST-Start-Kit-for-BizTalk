@@ -8,6 +8,8 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Newtonsoft.Json;
+using System.Net;
+using System.Collections.Generic;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
@@ -40,6 +42,26 @@ namespace bLogical.BizTalk.RESTBehavior
         public void BeforeSendReply(ref System.ServiceModel.Channels.Message reply, object correlationState)
         {
             var ctx = OperationContext.Current.Extensions.Find<RequestContext>();
+            HttpResponseMessageProperty prop = new HttpResponseMessageProperty();
+            reply.Properties.Add(HttpResponseMessageProperty.Name, prop);
+            var httpStatus = 200;
+            var httpStatusDescription = string.Empty;
+
+            // Check status code
+            var statusProperty = reply.Properties.FirstOrDefault<KeyValuePair<string, object>>(p => p.Key == MessageHelper.HttpStatusCode);
+            if (statusProperty.Value != null)
+            {
+                httpStatus = int.Parse(statusProperty.Value.ToString());
+                prop.StatusCode = (HttpStatusCode)httpStatus;
+            }
+
+            // Check status description
+            var statusDescriptionProperty = reply.Properties.FirstOrDefault<KeyValuePair<string, object>>(p => p.Key == MessageHelper.HttpStatusDescription);
+            if (statusDescriptionProperty.Value != null)
+            {
+                httpStatusDescription = statusDescriptionProperty.Value.ToString();
+                prop.StatusDescription = httpStatusDescription;
+            }
 
             if (ctx != null &&
                 ctx.RequestHeader.Headers["Accept"] != null &&
@@ -64,9 +86,10 @@ namespace bLogical.BizTalk.RESTBehavior
                 newReply.Properties.Add("Accept", "application/json;charset=utf-8");
 
                 // Set the outgoing Content-Type to application/json
-                HttpResponseMessageProperty prop = new HttpResponseMessageProperty();
                 newReply.Properties.Add(HttpResponseMessageProperty.Name, prop);
                 prop.Headers.Add("Content-Type", "application/json;charset=utf-8");
+                prop.StatusCode = (HttpStatusCode)httpStatus;
+                prop.StatusDescription = httpStatusDescription;
 
                 WebBodyFormatMessageProperty bodyFormat = new WebBodyFormatMessageProperty(WebContentFormat.Json);
                 newReply.Properties.Add(WebBodyFormatMessageProperty.Name, bodyFormat);

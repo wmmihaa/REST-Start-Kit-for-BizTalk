@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
-using System.Runtime.Serialization.Json;
-using System.ServiceModel.Channels;
-using System.ServiceModel.Configuration;
+using System.Linq;
+using System.Text;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
-using System.Text;
+using System.ServiceModel.Channels;
+using System.IO;
 using System.Xml;
 using Newtonsoft.Json;
+using System.Runtime.Serialization.Json;
 using Newtonsoft.Json.Converters;
+using System.Configuration;
+using System.ServiceModel.Configuration;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
@@ -113,9 +114,25 @@ namespace bLogical.BizTalk.RESTBehavior
 
             if (httpProp.Method == "GET" || httpProp.Method == "DELETE")
                 message = ConvertToURIRequest(message);
-            else if ((httpProp.Method == "POST" || httpProp.Method == "PUT") && ((HttpRequestMessageProperty)message.Properties["httpRequest"]).Headers.ToString().ToLower().Contains("application/json"))
+            else if ((httpProp.Method == "POST" || httpProp.Method == "PUT") &&
+                ((HttpRequestMessageProperty)message.Properties["httpRequest"]).Headers.ToString().ToLower().Contains("application/json"))
             {
-                message = ConvertToXmlMessage(message);
+                var via = message.Properties.Via;
+                var type = via.Segments.Last().ToString();
+                MemoryStream ms = new MemoryStream();
+                XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(ms);
+                message.WriteMessage(writer);
+                writer.Flush();
+                string xmlString = Encoding.UTF8.GetString(ms.ToArray());
+
+                xmlString = xmlString.Replace("<root", string.Format("<{0}", type));
+                xmlString = xmlString.Replace("root>", string.Format("{0}>", type));
+
+                MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(xmlString));
+                XmlReader reader = XmlReader.Create(stream);
+                Message newMessage = Message.CreateMessage(reader, int.MaxValue, MessageVersion.None);
+                newMessage.Properties.CopyProperties(message.Properties);
+                message = newMessage;
             }
 
             uriMatched = true;
@@ -152,17 +169,19 @@ namespace bLogical.BizTalk.RESTBehavior
                 MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(requestBody));
                 XmlReader reader = XmlReader.Create(ms);
 
-                newRequest = Message.CreateMessage(MessageVersion.None, "GET", reader);
+                newRequest = Message.CreateMessage(MessageVersion.None, "GetRequest", reader);
 
-                // To support Azure Service Bus Relay
-                newRequest.Headers.To = message.Headers.To;
-                newRequest.Headers.Action = message.Headers.Action;
-
-                // newRequest.Headers.CopyHeadersFrom(message);
+                HttpRequestMessageProperty httpRequestMessageProperty = new HttpRequestMessageProperty();
+                httpRequestMessageProperty.Method = "POST";
+                httpRequestMessageProperty.QueryString = string.Empty;
+                httpRequestMessageProperty.SuppressEntityBody = false;
+                httpRequestMessageProperty.Headers.Add("SOAPAction", "GetRequest");
+                httpRequestMessageProperty.Headers.Add("Content-Type", "text/xml; charset=utf-8");
 
                 foreach (var property in message.Properties)
                     newRequest.Properties.Add(property.Key, property.Value);
 
+                newRequest.Headers.CopyHeadersFrom(message);
             }
             catch (Exception ex)
             {
@@ -170,7 +189,5 @@ namespace bLogical.BizTalk.RESTBehavior
             }
             return newRequest;
         }
-
-
     }
 }

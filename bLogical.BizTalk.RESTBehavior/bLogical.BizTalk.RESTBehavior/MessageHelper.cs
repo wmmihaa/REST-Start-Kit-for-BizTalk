@@ -10,12 +10,16 @@ using System.Xml.Linq;
 
 namespace bLogical.BizTalk.RESTBehavior
 {
-    class MessageHelper
+    internal class MessageHelper
     {
+        public static readonly string PropertyNamespace = "https://bLogical.RESTSchemas.PropertySchema";
+        public static readonly string HttpStatusCode = PropertyNamespace + "#HTTPStatusCode";
+        public static readonly string HttpStatusDescription = PropertyNamespace + "#HTTPStatusDescription";
+
         public static readonly XNamespace BizTalkWebHttpNs = "http://bLogical.RESTSchemas.BizTalkWebHttpRequest/1.0";
         public static readonly XName Request = BizTalkWebHttpNs + "bizTalkWebHttpRequest";
         public static readonly XName Header = BizTalkWebHttpNs + "header";
-        public static readonly XName Params = BizTalkWebHttpNs + "params"; 
+        public static readonly XName Params = BizTalkWebHttpNs + "params";
         public static readonly XName Param = BizTalkWebHttpNs + "param";
         public static readonly XName Body = BizTalkWebHttpNs + "body";
 
@@ -96,7 +100,7 @@ namespace bLogical.BizTalk.RESTBehavior
             XElement paramsElement = new XElement(Params);
             root.Add(paramsElement);
 
-            if (uriTemplates != null) // UriTemplate exists. Eg /rest/firstname={fname}&lastname={lname}
+            if (uriTemplates != null && uriTemplates.Count > 0) // UriTemplate exists. Eg /rest/firstname={fname}&lastname={lname}
             {
                 bool templateMatch = false;
                 foreach (var uriTemplate in uriTemplates)
